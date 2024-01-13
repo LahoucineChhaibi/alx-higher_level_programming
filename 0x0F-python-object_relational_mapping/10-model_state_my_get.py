@@ -1,27 +1,23 @@
 #!/usr/bin/python3
-""" script that lists all State object with the name passed as argument """
+"""adds the State object “Louisiana”
+to the database hbtn_0e_6_usa"""
 
+if __name__ == "__main__":
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-import sys
-from model_state import Base, State
+    import sys
+    from model_state import Base, State
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
 
-if __name__ == '__main__':
-    h = 'localhost'
-    u = sys.argv[1]
-    pas = sys.argv[2]
-    db_n = sys.argv[3]
-    p = 3306
-    st_n = sys.argv[4]
-    eng = create_engine('mysql+mysqldb://{}:{}@{}:{}/{}'.format(
-          u, pas, h, p, db_n))
+    engine = create_engine('mysql+mysqldb://{}:{}@localhost/{}'
+                           .format(sys.argv[1], sys.argv[2],
+                                   sys.argv[3]), pool_pre_ping=True)
+    Base.metadata.create_all(engine)
 
-    Session = sessionmaker(bind=eng)
-    r = Session().query(State).order_by(State.id).filter(
-        State.name.like(st_n))
-    for state in r:
-        if state.id:
-            print("{}".format(state.id))
+    session = Session(engine)
+    state = session.query(State).filter(State.name == sys.argv[4]).first()
+    if state:
+        print("{}".format(state.id))
     else:
         print("Not found")
+    session.close()
